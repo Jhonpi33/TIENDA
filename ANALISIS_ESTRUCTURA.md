@@ -2036,3 +2036,25 @@ ni `Swal` importado directamente por las vistas.
 **`✓ built in 1.20s`** · Vite responde **200** en las 4 vistas.
 **Alcance:** solo `InventarioView.vue`, `CategoriasView.vue`, `ProveedoresView.vue`.
 
+
+---
+
+# C. PUBLICACIÓN EN GITHUB ✅ (6 oct 2026)
+
+**Repo:** <https://github.com/Jhonpi33/TIENDA.git> ·rama `main` ·commit `e8a6583`.
+
+- Se inicializó git **dentro de `TIENDA/`** para que el proyecto quede en la
+  raíz del repo (así Render lo construye sin configurar carpeta raíz). El repo
+  que existía en la carpeta superior (`BIEW`, sin commits) no se tocó.
+- **54 archivos / 13.086 líneas**; `.gitignore` ampliado con `~$*`,
+  `*.tmp.mjs` y `.fase7-*.tmp.mjs` (ni `node_modules`, ni `dist`, ni lock de Word).
+- `README.md` reescrito con pantallas, stack, comandos, decisiones de moneda y
+  alertas, pruebas y pasos de despliegue.
+- Verificado por API de GitHub: repo **público**, `default_branch: main`,
+  archivos en la raíz.
+
+**Despliegue en Render (siguiente paso):** sitio estático →
+Build `npm install && npm run build` · Publish `dist`.
+
+**Pendiente declarado por el usuario:** backend con API REST usando **axios**
+(hoy la persistencia es `localStorage` vía `pinia-plugin-persistedstate`).
