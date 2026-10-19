@@ -1,72 +1,112 @@
 # TIENDA — SENA Market
 
-Software de gestión de inventario para tienda (Vue 3 + Vite + Pinia + Quasar).
+Software de gestión de inventario para tienda, dividido en dos partes:
 
-## Pantallas
+```
+TIENDA/
+├── frontend/   # Vue 3 + Vite + Pinia + Quasar (la interfaz)
+├── backend/    # API REST en Node.js + Express + Mongoose (MongoDB Atlas)
+├── .gitignore
+└── REQUERIMIENTOS TIENDA.docx   # requisitos del proyecto
+```
 
-| Ruta | Contenido |
-|---|---|
-| `/#/` | Bienvenida (sin menú, cuadro animado S→E→N→A) |
-| `/#/dashboard` | Panel con indicadores y alertas de stock |
-| `/#/inventario` | Productos: crear, editar, eliminar, buscar y filtrar |
-| `/#/movimientos` | Entradas, salidas y ajustes de inventario |
-| `/#/categorias` | Categorías de productos |
-| `/#/proveedores` | Proveedores |
-| `/#/reportes` | Valorización e indicadores, exportación CSV y PDF |
+## Cómo ejecutar
 
-Al entrar desde la bienvenida se activa el menú hamburguesa con la navegación
-del sistema.
+Necesitas Node.js 20+ (probado con Node 24).
 
-## Stack
-
-- **Vue 3** (`<script setup>`) + **Vite**
-- **Pinia** con `pinia-plugin-persistedstate` (los datos se guardan en
-  `localStorage`; hoy no hay backend)
-- **Quasar** (componentes y layout)
-- **Vue Router** con historial por hash (`/#/...`)
-- **GSAP** (animación 3D de la bienvenida)
-- **SweetAlert2** (único sistema de alertas: `src/utils/alertas.js`)
-- **jsPDF** (exportación de reportes en PDF; CSV se genera a mano)
-
-## Ejecutar en local
+### 1. Backend (`backend/`)
 
 ```bash
+cd backend
+cp .env.example .env      # Windows: copia el archivo y renómbralo
+#   edita .env y pega tu MONGODB_URI de MongoDB Atlas
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # genera dist/
-npm run preview  # sirve dist/ en producción
+npm run dev               # http://localhost:3000
 ```
 
-## Decisiones transversales
+Comprobación rápida: abre <http://localhost:3000/api/salud> y debe responder
+`{"ok":true,"mensaje":"API de la tienda funcionando."}`.
 
-- **Moneda en COP**: toda la presentación de dinero pasa por
-  `src/utils/moneda.js` → `formatearMoneda()` (ej. `$1.250.000 COP`).
-  Los stores guardan números crudos, sin `$` ni `COP`.
-- **Alertas**: sin `alert()`, `confirm()` ni `prompt()` nativos; todo por
-  `src/utils/alertas.js` (SweetAlert2).
-- **Sin cantidades "monetizadas"**: stock, cantidades, códigos e IDs se
-  muestran como números simples.
+Al arrancar imprime también la IP de la red local, por si quieres abrir la
+app desde otro dispositivo del mismo Wi-Fi (`http://192.168.x.x:3000`).
 
-## Pruebas
+### 2. Frontend (`frontend/`)
 
 ```bash
-node fase7.test.mjs        # stores y utilidades
-node fase7.form.test.mjs   # formulario de productos (render propio, sin navegador)
+cd frontend
+npm install
+npm run dev               # http://localhost:5173
 ```
 
-## Análisis del proyecto
+El frontend llama a `/api` (**misma URL que la página**, nunca `localhost`
+fijo): en desarrollo Vite hace de proxy hacia `http://localhost:3000`, y en
+producción la sirve el propio backend. Sólo si la API viviera en otro
+dominio se definiría `VITE_API_URL`.
 
-El documento viviente con fases, decisiones y pendientes es
-[`ANALISIS_ESTRUCTURA.md`](./ANALISIS_ESTRUCTURA.md).
+> Desde la raíz también puedes usar `npm run dev:backend` y
+> `npm run dev:frontend`.
+
+## Ejecutar con Docker (recomendado en Mac)
+
+Si prefieres no instalar Node ni preocuparte por versiones, el proyecto
+incluye `Dockerfile` + `docker-compose.yml`: **un solo contenedor** con la API
+y el frontend compilado, igual que en Render. Funciona igual en Mac, Windows
+y Linux.
+
+Prerrequisito: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+(o Docker Engine + Compose plugin en Linux).
+
+```bash
+# 1) Único paso manual: crear el .env con tu contraseña de Atlas
+cp backend/.env.example backend/.env
+#   edita backend/.env y pega tu MONGODB_URI
+
+# 2) Compilar y arrancar (la primera vez tarda unos minutos)
+docker compose up --build
+
+# 3) Abrir http://localhost:3000  (API + interfaz en la misma URL)
+```
+
+- La API responde en <http://localhost:3000/api/salud>.
+- `backend/.env` **no** se copia dentro de la imagen (está en
+  `.dockerignore`): Compose lo inyecta en runtime con `env_file`.
+- Si falta `backend/.env`, Compose avisa con un error claro antes de arrancar.
+- Detener: `Ctrl+C` o, en segundo plano, `docker compose down`.
 
 ## Despliegue (Render)
 
-Sitio estático:
+Todo se despliega como **un solo servicio**: Express entrega la API
+(`/api/...`) y el build del frontend (`frontend/dist`) en la misma URL, así
+que no hay CORS ni configuración extra del frontend. El repo incluye un
+[`render.yaml`](./render.yaml) (Blueprint) con los ajustes ya definidos.
 
-- **Build command:** `npm install && npm run build`
-- **Publish directory:** `dist`
+1. Sube los cambios a GitHub (rama `main`).
+2. En <https://dashboard.render.com>: **New + → Blueprint → Connect a
+   repository** → elige `XleonGamesX/Tienda`.
+3. Render lee el `render.yaml` y muestra el servicio
+   (`tienda-sena-market`, plan Free, build `npm run build`, start
+   `npm start`). Al final pega tu cadena de **`MONGODB_URI`** de MongoDB
+   Atlas y pulsa **Apply**.
+4. Espera el primer deploy y abre la URL asignada
+   (`https://tienda-sena-market.onrender.com`): ya carga desde cualquier
+   red.
 
-## Pendiente
+> **Sin Blueprint (configuración manual):** New + → Web Service → conecta el
+> repo → Root Directory vacío → Build Command `npm run build` → Start
+> Command `npm start` → Plan Free → Environment: `MONGODB_URI`.
 
-- Backend con API REST (**axios**) para reemplazar la persistencia en
-  `localStorage`.
+Notas importantes:
+
+- **MongoDB Atlas → Network Access** debe permitir `0.0.0.0/0`; si sólo
+  permite tu IP local, Render no podrá conectar y el deploy falla.
+- El **plan gratuito duerme** el servicio tras 15 min sin peticiones: el
+  primer request de cada rato tarda ~40-60 s.
+- Cada `git push` a `main` vuelve a desplegar automáticamente.
+- Las variables del `backend/.env` **no** se suben al repo (están en
+  `.gitignore`); en Render van en Environment Variables.
+
+## Documentación
+
+- [`frontend/README.md`](./frontend/README.md): pantallas, stack y decisiones de la interfaz.
+- [`frontend/ANALISIS_ESTRUCTURA.md`](./frontend/ANALISIS_ESTRUCTURA.md): documento vivo con fases y pendientes.
+- [`backend/README.md`](./backend/README.md): endpoints y estructura de la API.

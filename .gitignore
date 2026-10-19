@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Variables de entorno (la API se conecta a MongoDB Atlas)
+.env
+.env.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,28 +1,15 @@
 {
-  "name": "tienda",
+  "name": "tienda-sena-market",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "description": "TIENDA — SENA Market: frontend (Vue + Vite) y backend (Express + MongoDB Atlas) en un solo despliegue",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && npm --prefix backend install",
+    "start": "npm --prefix backend start",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev"
   },
-  "dependencies": {
-    "@quasar/extras": "^2.1.0",
-    "gsap": "^3.15.0",
-    "jspdf": "^4.2.1",
-    "pinia": "^4.0.3",
-    "pinia-plugin-persistedstate": "^4.7.1",
-    "quasar": "^2.32.3",
-    "sweetalert2": "^11.26.25",
-    "vue": "^3.5.42",
-    "vue-router": "^4.6.4"
-  },
-  "devDependencies": {
-    "@quasar/vite-plugin": "^2.0.2",
-    "@vitejs/plugin-vue": "^6.0.8",
-    "sass-embedded": "^1.104.1",
-    "vite": "^8.3.0"
+  "engines": {
+    "node": ">=20"
   }
 }

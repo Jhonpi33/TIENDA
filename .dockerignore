@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------------
+# Qué NO debe entrar en la imagen Docker.
+# Lo más importante: backend/.env (tu contraseña de Atlas) NUNCA se copia;
+# el contenedor la recibe en runtime desde docker-compose (env_file).
+# ---------------------------------------------------------------------------
+**/node_modules
+**/dist
+.git
+.gitignore
+
+# Secretos y variables de entorno
+**/.env
+**/.env.local
+**/*.local
+
+# Logs y temporales
+**/logs
+**/*.log
+**/*.tmp.mjs
+**/.fase7-*.tmp.mjs
+
+# Archivos que no son código
+**/*.docx
+**/.DS_Store

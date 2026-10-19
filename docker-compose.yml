@@ -1,0 +1,36 @@
+# ---------------------------------------------------------------------------
+# Docker Compose: UN solo servicio con la API y el frontend compilado.
+# Mismo esquema que render.yaml, pero corriendo en local.
+#
+#   1) cp backend/.env.example backend/.env   (y pegar tu MONGODB_URI)
+#   2) docker compose up --build
+#   3) abrir http://localhost:3000
+#
+# Si falta backend/.env, Compose avisa con un error claro antes de arrancar.
+# ---------------------------------------------------------------------------
+services:
+  tienda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tienda-sena-market
+    ports:
+      - "3000:3000"
+    # Secretos en RUNTIME desde el host: backend/.env NO viaja dentro de la imagen.
+    env_file:
+      - ./backend/.env
+    environment:
+      # El puerto dentro del contenedor siempre es 3000 (coincide con el mapeo).
+      PORT: 3000
+      NODE_ENV: production
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/api/salud').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
