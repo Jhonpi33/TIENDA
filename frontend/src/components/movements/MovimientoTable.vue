@@ -25,6 +25,18 @@
     <q-table flat :rows="movements" row-key="id" :columns="columns" no-data-label="Aún no hay movimientos registrados">
 
       <!--
+        COLUMNA CÓDIGO
+        Cada movimiento tiene su propio identificador único (MOV-###), que
+        genera el backend. Se muestra en monoespaciado para que las cifras
+        queden alineadas y sea fácil compararlas o copiarlas.
+      -->
+      <template #body-cell-codigo="props">
+        <q-td :props="props">
+          <span class="movimiento-codigo">{{ props.row.codigo || '—' }}</span>
+        </q-td>
+      </template>
+
+      <!--
         COLUMNA FECHA
         El store guarda fecha en ISO (2026-09-29T15:04:05.000Z).
         Se convierte a formato local legible para el usuario.
@@ -106,6 +118,13 @@ const productosStore = useProductosStore()
 
 // Definición de columnas: mismo formato que usa ProductTable.vue
 const columns = [
+  {
+    name: 'codigo',
+    label: 'Código',
+    field: 'codigo',
+    align: 'left',
+    sortable: true
+  },
   {
     name: 'fecha',
     label: 'Fecha',
@@ -200,6 +219,19 @@ function formatFecha(fecha) {
 /* Nombre del producto en negrita y su código en gris debajo */
 .producto-nombre {
   font-weight: 600;
+}
+
+/* Identificador único del movimiento (MOV-###), monoespaciado para que las
+   cifras queden alineadas y sea fácil compararlas de un vistazo. */
+.movimiento-codigo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(15, 41, 77, 0.85);
+  background: rgba(30, 158, 255, 0.10);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
 
 .producto-codigo {

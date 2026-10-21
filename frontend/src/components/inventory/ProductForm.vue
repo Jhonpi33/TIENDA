@@ -26,8 +26,25 @@
           <q-select v-model="form.categoriaId" :options="categories" option-label="nombre" option-value="id" emit-value
             map-options outlined label="Categoría" required />
 
+          <!--
+            PROVEEDOR
+            Al pasar el cursor sobre una opción aparece, AL LADO del selector,
+            la vista previa del proveedor: su especialidad (derivada de las
+            categorías de sus productos) y una muestra de ellos. El slot
+            #option sólo cambia lo que se pinta en la lista; la selección
+            sigue emitiendo el id igual que antes.
+          -->
           <q-select v-model="form.proveedorId" :options="suppliers" option-label="nombre" option-value="id" emit-value
-            map-options outlined label="Proveedor" required />
+            map-options outlined label="Proveedor" required @popup-hide="ocultarPreview">
+            <template #option="scope">
+              <q-item v-bind="scope.itemProps" @mouseenter="mostrarPreview($event, scope.opt)"
+                @mouseleave="ocultarPreview">
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.nombre }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
           <q-input :model-value="formatPrice(form.precioCompra)" outlined label="Precio de compra" prefix="$" required
             @update:model-value="updatePrice('precioCompra', $event)" />
@@ -53,12 +70,23 @@
 
         <q-btn color="primary" label="Guardar producto" @click="saveProduct" />
       </q-card-actions>
+
+      <!--
+        Vista previa del proveedor bajo el cursor (se tele-transporta a body,
+        así que su ubicación aquí no importa).
+      -->
+      <ProviderPreview :proveedor="proveedorEnHover" :ancla="anclaEnHover" @hide="ocultarPreview" />
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
+
+// Vista previa del proveedor (especialidad + muestra de productos) al
+// pasar el cursor sobre una opción del selector
+import ProviderPreview from '../providers/ProviderPreview.vue'
+import { useProveedorHover } from '../../utils/proveedorHover'
 
 const props = defineProps({
   modelValue: {
@@ -92,6 +120,9 @@ const emit = defineEmits([
   'update:modelValue',
   'save'
 ])
+
+// Vista previa del proveedor bajo el cursor
+const { proveedorEnHover, anclaEnHover, mostrarPreview, ocultarPreview } = useProveedorHover()
 
 // Error detectado por la validación de ESTE formulario
 const localError = ref('')
@@ -279,6 +310,10 @@ watch(
   (abierto) => {
     if (abierto) {
       sincronizarFormulario()
+    } else {
+      // El diálogo se cierra con el menú del selector abierto: el cartel
+      // no debe quedarse huérfano en pantalla.
+      ocultarPreview()
     }
   }
 )

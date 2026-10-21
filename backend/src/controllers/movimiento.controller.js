@@ -2,6 +2,7 @@ import { Movimiento } from '../models/Movimiento.js'
 import { Producto } from '../models/Producto.js'
 import { validarMovimiento } from '../validations/movimiento.validation.js'
 import { errorNoEncontrado, errorValidacion } from '../utils/ApiError.js'
+import { generarCodigoConsecutivo } from '../utils/codigos.js'
 
 // ---------------------------------------------------------------------------
 // MOVIMIENTOS DE INVENTARIO
@@ -9,6 +10,9 @@ import { errorNoEncontrado, errorValidacion } from '../utils/ApiError.js'
 // La actualización es ATÓMICA (findOneAndUpdate con condición) para que dos
 // salidas simultáneas nunca dejen el stock en negativo, y si la creación del
 // movimiento falla se revierte el stock aplicado.
+//
+// Cada movimiento recibe además su propio código MOV-### (entrada, salida o
+// ajuste), generado con el mismo patrón que el PRD-### de los productos.
 // ---------------------------------------------------------------------------
 
 // GET /api/movimientos
@@ -91,7 +95,14 @@ export async function registrarMovimiento(req, res) {
     }
 
     try {
+        // El código MOV-### se genera aquí, ANTES de crear el documento, para
+        // que viaje en la respuesta y el frontend pueda mostrarlo. Si dos
+        // altas simultáneas calculan el mismo número, el índice único del
+        // modelo rechaza la segunda en lugar de duplicar el código.
+        const codigo = await generarCodigoConsecutivo(Movimiento, 'MOV-')
+
         const movimiento = await Movimiento.create({
+            codigo,
             productoId: producto._id,
             tipo: datos.tipo,
             cantidad: datos.cantidad,

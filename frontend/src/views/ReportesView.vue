@@ -720,10 +720,11 @@ const seccionesExportables = computed(() => [
     {
         titulo: 'Últimos 10 movimientos',
         columnas: [
+            { etiqueta: 'Movimiento', tipo: 'texto' },
             { etiqueta: 'Fecha', tipo: 'fecha' },
             { etiqueta: 'Tipo', tipo: 'texto' },
             { etiqueta: 'Producto', tipo: 'texto' },
-            { etiqueta: 'Código', tipo: 'texto' },
+            { etiqueta: 'Cód. producto', tipo: 'texto' },
             { etiqueta: 'Cantidad', tipo: 'entero' }
         ],
         filas: ultimosMovimientos.value.map((movimiento) => {
@@ -731,6 +732,8 @@ const seccionesExportables = computed(() => [
             const producto = productosStore.obtenerProductos(movimiento.productoId)
 
             return [
+                // Identificador único del movimiento (MOV-###)
+                movimiento.codigo || '',
                 fechaLocal(movimiento.fecha),
                 etiquetaTipo(movimiento.tipo),
                 producto ? producto.nombre : 'Producto eliminado',

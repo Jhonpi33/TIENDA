@@ -7,9 +7,19 @@ import mongoose from 'mongoose'
 // condición de stock) y luego se crea el movimiento; si la creación falla,
 // se revierte el stock. Así nunca queda un movimiento sin su efecto en el
 // inventario ni un stock negativo.
+//
+// - codigo: MOV-### autogenerado por el controlador (máximo existente + 1) y
+//   con índice único: cada movimiento, sea entrada, salida o ajuste, tiene un
+//   identificador propio e irrepetible, como el PRD-### de los productos.
 // ---------------------------------------------------------------------------
 const movimientoSchema = new mongoose.Schema(
     {
+        codigo: {
+            type: String,
+            required: [true, 'El código del movimiento es obligatorio.'],
+            uppercase: true,
+            trim: true
+        },
         productoId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Producto',
@@ -37,5 +47,9 @@ const movimientoSchema = new mongoose.Schema(
         versionKey: false
     }
 )
+
+// Índice único: dos movimientos nunca pueden compartir código, aunque dos
+// peticiones simultáneas lleguen al mismo instante.
+movimientoSchema.index({ codigo: 1 }, { unique: true })
 
 export const Movimiento = mongoose.model('Movimiento', movimientoSchema)

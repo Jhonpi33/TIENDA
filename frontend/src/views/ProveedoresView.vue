@@ -59,10 +59,14 @@ import { confirmarOperacion, mostrarAdvertencia, mostrarError, mostrarExito } fr
 import { mensajeDeError } from '../utils/errores'
 import { useProveedoresStore } from '../stores/proveedores'
 import { useProductosStore } from '../stores/productos'
+// Las categorías hacen falta para derivar la ESPECIALIDAD que muestra la
+// vista previa del proveedor (las categorías de sus productos)
+import { useCategoriasStore } from '../stores/categorias'
 
 const proveedoresStore = useProveedoresStore()
 // Solo se consulta: permite saber si un proveedor está siendo usado
 const productosStore = useProductosStore()
+const categoriasStore = useCategoriasStore()
 
 // ---------------------------------------------------------------------------
 // PREVIO DE CARGA (skeleton): encendido mientras el backend responde y sólo
@@ -79,7 +83,9 @@ onMounted(async () => {
   try {
     await Promise.all([
       proveedoresStore.cargarProveedores(),
-      productosStore.cargarProductos()
+      productosStore.cargarProductos(),
+      // Necesarias para la vista previa: derivan la especialidad del proveedor
+      categoriasStore.cargarCategorias()
     ])
   } catch (error) {
     mostrarError({

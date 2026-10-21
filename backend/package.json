@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "verificar": "node scripts/verificar-api.mjs"
+    "verificar": "node scripts/verificar-api.mjs",
+    "semilla": "node scripts/semillero.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",

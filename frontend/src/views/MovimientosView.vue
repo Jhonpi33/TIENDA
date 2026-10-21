@@ -149,8 +149,12 @@ async function guardarMovimiento(datos) {
   // 2. ACTUALIZA EL STOCK del producto de forma atómica (requisito 8)
   // 3. guarda el movimiento y devuelve ambos datos
   // Si algo falla, lanza el error con el motivo y aquí se muestra.
+  let movimientoGuardado = null
+
   try {
-    await movimientosStore.registrarMovimiento(datos)
+    // El store devuelve el movimiento YA CREADO, con su código MOV-###. Ese
+    // código se muestra en el cartel de éxito para poder referenciarlo luego.
+    movimientoGuardado = await movimientosStore.registrarMovimiento(datos)
   } catch (error) {
     // FALLO: se explica el motivo y el formulario sigue abierto para corregir.
     // La tabla no cambió porque el backend no aplicó nada.
@@ -171,20 +175,24 @@ async function guardarMovimiento(datos) {
   // - la tabla y el stock se actualizaron por la reactividad de Pinia
   showForm.value = false
 
-  mostrarExito(mensajeDeExito(datos.tipo))
+  mostrarExito(mensajeDeExito(datos.tipo, movimientoGuardado?.codigo))
 }
 
-// Texto de éxito según el tipo de movimiento (toast, no bloquea la pantalla)
-function mensajeDeExito(tipo) {
+// Texto de éxito según el tipo de movimiento. Si el backend devolvió el
+// código MOV-###, se agrega al final: así el usuario puede anotarlo o
+// buscarlo en la tabla.
+function mensajeDeExito(tipo, codigo) {
+  const sufijo = codigo ? ` (Código ${codigo})` : ''
+
   if (tipo === 'entrada') {
-    return 'Entrada registrada correctamente.'
+    return `Entrada registrada correctamente${sufijo}.`
   }
 
   if (tipo === 'salida') {
-    return 'Salida registrada correctamente.'
+    return `Salida registrada correctamente${sufijo}.`
   }
 
-  return 'Corrección de stock realizada correctamente.'
+  return `Corrección de stock realizada correctamente${sufijo}.`
 }
 </script>
 
